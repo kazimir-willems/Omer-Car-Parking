@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">CarParking</string>
+    <string name="select_ringtones">Select Ringtones</string>
+    <string name="hint_no_lot">No Parking Lot</string>
+    <string name="hint_existing_lot">Default Tune</string>
+    <string name="hint_office">Office</string>
+    <string name="hint_address">Address</string>
+    <string name="hint_latitude">Latitude</string>
+    <string name="hint_longitude">Longitude</string>
+    <string name="hint_remaining_lot">Remaining Slot</string>
+    <string name="select_office">Select Office</string>
+    <string name="action_search">Search</string>
+    <string name="network_error">Network Error</string>
+
+    <string name="processing">Processing...</string>
+
+    <string name="btn_ok">Ok</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_set_office">Set Office</string>
+
+    <string name="entering_office">Hi, you are entering your office</string>
+    <string name="exiting_office">You are leaving your office</string>
+    <string name="no_parking_lot">There are no parking slots.</string>
+    <string name="ask_came_with_car">There are parking slots, please confirm if you came in with your car.</string>
+    <string name="ask_leaving_office">Are you leaving office?</string>
+</resources>
