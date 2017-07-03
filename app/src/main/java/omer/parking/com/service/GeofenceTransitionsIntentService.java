@@ -53,7 +53,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         // Get the transition type.
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            showNotification("Entering");
+//            showNotification("Entering");
             if(!SharedPrefManager.getInstance(this).getInOffice()) {
                 new Thread(new Runnable() {
                     @Override
@@ -64,7 +64,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 }).start();
             }
         } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-            showNotification("Leaving");
+//            showNotification("Leaving");
             SharedPrefManager.getInstance(this).saveInOffice(false);
             if(SharedPrefManager.getInstance(this).getCameWithCar())
                 showExitNotification();
