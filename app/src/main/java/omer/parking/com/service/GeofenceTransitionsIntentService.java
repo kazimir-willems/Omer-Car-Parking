@@ -90,7 +90,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         // 2. Create a PendingIntent for AllGeofencesActivity
         Intent intent = new Intent(this, LotInfoActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra("enter_flag", 1);
         PendingIntent pendingNotificationIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -117,7 +117,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         // 2. Create a PendingIntent for AllGeofencesActivity
         Intent intent = new Intent(this, LotInfoActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra("enter_flag", 0);
         intent.putExtra("remaining_slot", remainSlot);
         PendingIntent pendingNotificationIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

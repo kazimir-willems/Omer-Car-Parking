@@ -1,6 +1,7 @@
 package omer.parking.com.ui;
 
 import android.Manifest;
+import android.app.IntentService;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -174,8 +175,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         Geofence fence = new Geofence.Builder()
                 .setRequestId(id)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                .setCircularRegion(latitude, longitude, 50) // Try changing your radius
-                .setLoiteringDelay((int)GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                .setCircularRegion(latitude, longitude, 300) // Try changing your radius
+//                .setLoiteringDelay((int)GEOFENCE_EXPIRATION_IN_MILLISECONDS)
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .build();
         mGeofenceList.add(fence);
@@ -272,7 +273,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         SharedPrefManager.getInstance(this).saveLatitude(String.valueOf(item.getLatitude()));
         SharedPrefManager.getInstance(this).saveLongitude(String.valueOf(item.getLongitude()));
 
-        Toast.makeText(this, "Welcome", Toast.LENGTH_LONG).show();
+        SharedPrefManager.getInstance(this).saveFirstRun(false);
+
+        Intent intent = new Intent(MainActivity.this, OfficeInfoActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
     }
 }

@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import omer.parking.com.R;
 import omer.parking.com.service.GPSTracker;
+import omer.parking.com.util.SharedPrefManager;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -24,10 +25,17 @@ public class SplashActivity extends AppCompatActivity {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(SplashActivity.this, SettingsActivity.class);
+                if(SharedPrefManager.getInstance(SplashActivity.this).getFirstRun()) {
+                    Intent intent = new Intent(SplashActivity.this, SettingsActivity.class);
 
-                startActivity(intent);
-                finish();
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Intent intent = new Intent(SplashActivity.this, OfficeInfoActivity.class);
+
+                    startActivity(intent);
+                    finish();
+                }
             }
         };
 
