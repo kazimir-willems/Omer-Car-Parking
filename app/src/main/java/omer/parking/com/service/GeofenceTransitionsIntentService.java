@@ -8,7 +8,6 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.usage.UsageEvents;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -25,8 +24,6 @@ import omer.parking.com.R;
 import omer.parking.com.event.GetLotEvent;
 import omer.parking.com.task.GetRemainingLotTask;
 import omer.parking.com.ui.LotInfoActivity;
-import omer.parking.com.ui.MainActivity;
-import omer.parking.com.ui.SettingsActivity;
 import omer.parking.com.util.SharedPrefManager;
 import omer.parking.com.vo.GetLotResponseVo;
 
@@ -53,8 +50,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
         // Get the transition type.
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-//            showNotification("Entering");
-            if(!SharedPrefManager.getInstance(this).getInOffice()) {
+            Log.v("Notification", "Entered");
+
+            SharedPrefManager.getInstance(this).saveInOffice(true);
+
+            if(SharedPrefManager.getInstance(this).getLeaving()) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -64,12 +64,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 }).start();
             }
         } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-//            showNotification("Leaving");
+            Log.v("Notification", "Exited");
             SharedPrefManager.getInstance(this).saveInOffice(false);
-            if(SharedPrefManager.getInstance(this).getCameWithCar())
+            if(SharedPrefManager.getInstance(this).getCameWithCar() == 1) {     // Ask if leaving
                 showExitNotification();
-        } else {
-//            showNotification("Error", "Error");
+            } else if(SharedPrefManager.getInstance(this).getCameWithCar() == 0 || SharedPrefManager.getInstance(this).getCameWithCar() == 2) {  //No Slot or Not came with car
+                SharedPrefManager.getInstance(this).saveLeaving(true);
+            }
         }
     }
 
@@ -77,9 +78,15 @@ public class GeofenceTransitionsIntentService extends IntentService {
     public void onGetLotEvent(GetLotEvent event) {
         GetLotResponseVo responseVo = event.getResponse();
         if (responseVo != null) {
-            if(!SharedPrefManager.getInstance(this).getInOffice())
+            if(responseVo.remain_lot == 0) {
+                SharedPrefManager.getInstance(this).saveCameWithCar(0);
+                showNoSlotNotification();
+            } else if (responseVo.remain_lot > 0) {
                 showEnterNotification(responseVo.remain_lot);
+            }
         }
+
+        EventBus.getDefault().unregister(this);
     }
 
     public void showExitNotification() {
@@ -122,13 +129,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         intent.putExtra("remaining_slot", remainSlot);
         PendingIntent pendingNotificationIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        String soundUri = "";
-        if(remainSlot == 0) {
-            soundUri = SharedPrefManager.getInstance(this).getNoLotTune();
-        } else {
-            soundUri = SharedPrefManager.getInstance(this).getDefaultTune();
-        }
-        Uri sound = Uri.parse(soundUri);
+        Uri sound = Uri.parse(SharedPrefManager.getInstance(this).getDefaultTune());
         // 3. Create and send a notification
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -143,25 +144,25 @@ public class GeofenceTransitionsIntentService extends IntentService {
         notificationManager.notify(0, notification);
     }
 
-    public void showNotification(String message) {
+    public void showNoSlotNotification() {
 
         // 1. Create a NotificationManager
         NotificationManager notificationManager =
                 (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         // 2. Create a PendingIntent for AllGeofencesActivity
-        Intent intent = new Intent(this, LotInfoActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("enter_flag", 1);
-        PendingIntent pendingNotificationIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingNotificationIntent = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Uri soundUri = Uri.parse(SharedPrefManager.getInstance(this).getNoLotTune());
 
         // 3. Create and send a notification
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(getResources().getString(R.string.app_name))
-                .setContentText(message)
+                .setContentText(getResources().getString(R.string.no_parking_lot))
                 .setContentIntent(pendingNotificationIntent)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(getResources().getString(R.string.no_parking_lot)))
+                .setSound(soundUri)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .build();

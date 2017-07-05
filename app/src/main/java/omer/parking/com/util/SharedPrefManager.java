@@ -19,6 +19,7 @@ public class SharedPrefManager {
     private static final String TAG_NO_LOT_TUNE_NAME = "no_tune_name";
     private static final String TAG_CAME_WITH_CAR = "came_with_car";
     private static final String TAG_IN_OFFICE = "in_office";
+    private static final String TAG_LEAVE_FLAG = "leave_flag";  //true: leaved, false: not leaved.
 
     private static SharedPrefManager mInstance;
     private static Context mCtx;
@@ -177,18 +178,18 @@ public class SharedPrefManager {
         return  sharedPreferences.getBoolean(TAG_FIRST_RUN, true);
     }
 
-    public boolean saveCameWithCar(boolean value){
+    public boolean saveCameWithCar(int value){
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(TAG_CAME_WITH_CAR, value);
+        editor.putInt(TAG_CAME_WITH_CAR, value);
         editor.apply();
         return true;
     }
 
     //this method will fetch the device token from shared preferences
-    public boolean getCameWithCar(){
+    public int getCameWithCar(){
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        return  sharedPreferences.getBoolean(TAG_CAME_WITH_CAR, true);
+        return  sharedPreferences.getInt(TAG_CAME_WITH_CAR, 1);
     }
 
     public boolean saveInOffice(boolean value){
@@ -203,5 +204,19 @@ public class SharedPrefManager {
     public boolean getInOffice(){
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         return  sharedPreferences.getBoolean(TAG_IN_OFFICE, false);
+    }
+
+    public boolean saveLeaving(boolean value){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(TAG_LEAVE_FLAG, value);
+        editor.apply();
+        return true;
+    }
+
+    //this method will fetch the device token from shared preferences
+    public boolean getLeaving(){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return  sharedPreferences.getBoolean(TAG_LEAVE_FLAG, true);
     }
 }

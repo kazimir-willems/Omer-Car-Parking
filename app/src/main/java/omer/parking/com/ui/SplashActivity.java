@@ -16,10 +16,10 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        GPSTracker gps;
+        /*GPSTracker gps;
         gps = new GPSTracker(this);
 
-        gps.canGetLocation();
+        gps.canGetLocation();*/
 
         Handler handler = new Handler();
         Runnable runnable = new Runnable() {

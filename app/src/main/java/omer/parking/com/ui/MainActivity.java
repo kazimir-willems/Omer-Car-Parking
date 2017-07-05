@@ -17,14 +17,17 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -48,7 +51,7 @@ import omer.parking.com.task.GetRemainingLotTask;
 import omer.parking.com.util.SharedPrefManager;
 import omer.parking.com.vo.GetOfficeResponseVo;
 
-public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
+public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, OnCompleteListener<Void>{
 
     private ArrayList<Geofence> mGeofenceList = new ArrayList<>();
     private PendingIntent mGeofencePendingIntent = null;
@@ -64,13 +67,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private ProgressDialog progressDialog;
 
-    private static final long GEOFENCE_EXPIRATION_IN_HOURS = 24;
+    private static final int RADIUS = 300;
 
-    /**
-     * For this sample, geofences expire after twelve hours.
-     */
-    static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS =
-            GEOFENCE_EXPIRATION_IN_HOURS * 60 * 60 * 1000;
+    OfficeItem selectedItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,11 +145,12 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                     1);
             return;
         }
+
         mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
                 .addOnSuccessListener(this, new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.v("Status", "Added successfully");
+                    Log.v("Status", "Added Successfully");
                     }
                 })
                 .addOnFailureListener(this, new OnFailureListener() {
@@ -163,20 +163,17 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 });
     }
 
-    public void createGeofence(OfficeItem item) {
-        mGeofencingClient.removeGeofences(getGeofencePendingIntent());
-        mGeofenceList.clear();
-        addGeofence(item.getLatitude(), item.getLongitude());
+    public void createGeofence(final OfficeItem item) {
+        mGeofencingClient.removeGeofences(getGeofencePendingIntent()).addOnCompleteListener(this);
     }
 
     public void addGeofence(double latitude, double longitude) {
 
-        String id = UUID.randomUUID().toString();
+        String id = "SFO";
         Geofence fence = new Geofence.Builder()
                 .setRequestId(id)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                .setCircularRegion(latitude, longitude, 300) // Try changing your radius
-//                .setLoiteringDelay((int)GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                .setCircularRegion(latitude, longitude, RADIUS) // Try changing your radius
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .build();
         mGeofenceList.add(fence);
@@ -264,8 +261,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     public void setOffice(OfficeItem item) {
+        selectedItem = item;
         createGeofence(item);
-        createGeofenceRequest();
 
         SharedPrefManager.getInstance(this).saveCurrentOfficeID(item.getOfficeID());
         SharedPrefManager.getInstance(this).saveOffice(item.getOfficeName());
@@ -273,11 +270,24 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         SharedPrefManager.getInstance(this).saveLatitude(String.valueOf(item.getLatitude()));
         SharedPrefManager.getInstance(this).saveLongitude(String.valueOf(item.getLongitude()));
 
+        SharedPrefManager.getInstance(this).saveLeaving(true);
+
         SharedPrefManager.getInstance(this).saveFirstRun(false);
 
         Intent intent = new Intent(MainActivity.this, OfficeInfoActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onComplete(@NonNull Task<Void> task) {
+        if (task.isSuccessful()) {
+            mGeofenceList.clear();
+            addGeofence(selectedItem.getLatitude(), selectedItem.getLongitude());
+            createGeofenceRequest();
+        } else {
+            // Get the status code for the error and log it using a user-friendly message.
+        }
     }
 }

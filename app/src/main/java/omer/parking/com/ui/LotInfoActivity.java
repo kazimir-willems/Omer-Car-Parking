@@ -123,7 +123,6 @@ public class LotInfoActivity extends AppCompatActivity {
         IncLotResponseVo responseVo = event.getResponse();
         if (responseVo != null) {
             tvRemainingLot.setText(String.valueOf(responseVo.remain_lot));
-            SharedPrefManager.getInstance(this).saveCameWithCar(false);
         } else {
             networkError();
         }
@@ -131,29 +130,16 @@ public class LotInfoActivity extends AppCompatActivity {
 
     private void processLot(int remainSlot) {
         tvRemainingLot.setText(String.valueOf(remainSlot));
-        SharedPrefManager.getInstance(this).saveInOffice(true);
-        if(remainSlot == 0) {
-            SharedPrefManager.getInstance(this).saveCameWithCar(false);
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.app_name);
-            builder.setMessage(R.string.no_parking_lot);
-            builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            AlertDialog alertDialog = builder.create();
-            alertDialog.setCancelable(false);
-            alertDialog.show();
-        } else {
+
+        if(SharedPrefManager.getInstance(this).getLeaving()) {
+            SharedPrefManager.getInstance(this).saveLeaving(false);
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.app_name);
             builder.setMessage(R.string.ask_came_with_car);
             builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    SharedPrefManager.getInstance(LotInfoActivity.this).saveCameWithCar(true);
+                    SharedPrefManager.getInstance(LotInfoActivity.this).saveCameWithCar(1);
                     startDecLotTask();
                 }
             });
@@ -161,21 +147,13 @@ public class LotInfoActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
-                    SharedPrefManager.getInstance(LotInfoActivity.this).saveCameWithCar(false);
+                    SharedPrefManager.getInstance(LotInfoActivity.this).saveCameWithCar(2);
                 }
             });
             AlertDialog alertDialog = builder.create();
             alertDialog.setCancelable(false);
             alertDialog.show();
         }
-//        playSound(remainSlot);
-    }
-
-    private void startGetLotTask() {
-        progressDialog.show();
-
-        GetRemainingLotTask task = new GetRemainingLotTask();
-        task.execute(SharedPrefManager.getInstance(this).getCurrentOfficeID());
     }
 
     private void startDecLotTask() {
@@ -192,6 +170,9 @@ public class LotInfoActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveLeaving(true);
+
+                progressDialog.show();
                 IncLotTask task = new IncLotTask();
                 task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getCurrentOfficeID());
             }
