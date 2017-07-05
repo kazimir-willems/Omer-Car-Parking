@@ -54,7 +54,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
             SharedPrefManager.getInstance(this).saveInOffice(true);
 
-            if(SharedPrefManager.getInstance(this).getLeaving()) {
+            if(SharedPrefManager.getInstance(this).getCameWithCar() == 3) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -68,8 +68,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
             SharedPrefManager.getInstance(this).saveInOffice(false);
             if(SharedPrefManager.getInstance(this).getCameWithCar() == 1) {     // Ask if leaving
                 showExitNotification();
-            } else if(SharedPrefManager.getInstance(this).getCameWithCar() == 0 || SharedPrefManager.getInstance(this).getCameWithCar() == 2) {  //No Slot or Not came with car
-                SharedPrefManager.getInstance(this).saveLeaving(true);
+            } else if(SharedPrefManager.getInstance(this).getCameWithCar() == 3 || SharedPrefManager.getInstance(this).getCameWithCar() == 2) {  //No Slot or Not came with car
+                SharedPrefManager.getInstance(this).saveCameWithCar(3);
             }
         }
     }
@@ -78,11 +78,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
     public void onGetLotEvent(GetLotEvent event) {
         GetLotResponseVo responseVo = event.getResponse();
         if (responseVo != null) {
-            if(responseVo.remain_lot == 0) {
-                SharedPrefManager.getInstance(this).saveCameWithCar(0);
-                showNoSlotNotification();
-            } else if (responseVo.remain_lot > 0) {
-                showEnterNotification(responseVo.remain_lot);
+            if(SharedPrefManager.getInstance(this).getCameWithCar() == 3) {
+                if (responseVo.remain_lot == 0) {
+                    showNoSlotNotification();
+                    return;
+                } else if (responseVo.remain_lot > 0) {
+                    showEnterNotification(responseVo.remain_lot);
+                }
             }
         }
 

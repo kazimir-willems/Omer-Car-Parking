@@ -20,4 +20,8 @@ public class URLManager {
     public static String getDecLotURL() {
         return "http://contactusmap.com/Parking/public/decLot";
     }
+
+    public static String getLoginURL() {
+        return "http://contactusmap.com/Parking/public/login";
+    }
 }

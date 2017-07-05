@@ -17,7 +17,7 @@ public class SharedPrefManager {
     private static final String TAG_FIRST_RUN = "first_run";
     private static final String TAG_DEFAULT_TUNE_NAME = "default_tune_name";
     private static final String TAG_NO_LOT_TUNE_NAME = "no_tune_name";
-    private static final String TAG_CAME_WITH_CAR = "came_with_car";
+    private static final String TAG_CAME_WITH_CAR = "came_with_car";        //0:No Slot, 1:Parked, 2:No Car, 3:Not parked
     private static final String TAG_IN_OFFICE = "in_office";
     private static final String TAG_LEAVE_FLAG = "leave_flag";  //true: leaved, false: not leaved.
 
@@ -189,7 +189,7 @@ public class SharedPrefManager {
     //this method will fetch the device token from shared preferences
     public int getCameWithCar(){
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        return  sharedPreferences.getInt(TAG_CAME_WITH_CAR, 1);
+        return  sharedPreferences.getInt(TAG_CAME_WITH_CAR, 3);
     }
 
     public boolean saveInOffice(boolean value){

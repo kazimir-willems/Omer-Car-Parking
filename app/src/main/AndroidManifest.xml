@@ -40,10 +40,10 @@
         <activity
             android:name=".ui.LotInfoActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.OfficeInfoActivity"
             android:screenOrientation="portrait" />
+        <activity android:name=".ui.LoginActivity"></activity>
     </application>
 
 </manifest>

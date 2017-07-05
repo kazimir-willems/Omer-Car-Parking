@@ -25,17 +25,11 @@ public class SplashActivity extends AppCompatActivity {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if(SharedPrefManager.getInstance(SplashActivity.this).getFirstRun()) {
-                    Intent intent = new Intent(SplashActivity.this, SettingsActivity.class);
+                Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+                startActivity(intent);
 
-                    startActivity(intent);
-                    finish();
-                } else {
-                    Intent intent = new Intent(SplashActivity.this, OfficeInfoActivity.class);
-
-                    startActivity(intent);
-                    finish();
-                }
+                finish();
+                /**/
             }
         };
 

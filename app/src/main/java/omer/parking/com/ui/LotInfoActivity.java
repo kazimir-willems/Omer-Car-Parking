@@ -96,17 +96,6 @@ public class LotInfoActivity extends AppCompatActivity {
     }
 
     @Subscribe
-    public void onGetLotEvent(GetLotEvent event) {
-        hideProgressDialog();
-        GetLotResponseVo responseVo = event.getResponse();
-        if (responseVo != null) {
-            processLot(responseVo.remain_lot);
-        } else {
-            networkError();
-        }
-    }
-
-    @Subscribe
     public void onDecLotEvent(DecLotEvent event) {
         hideProgressDialog();
         DecLotResponseVo responseVo = event.getResponse();
@@ -170,7 +159,7 @@ public class LotInfoActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                SharedPrefManager.getInstance(LotInfoActivity.this).saveLeaving(true);
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveCameWithCar(3);
 
                 progressDialog.show();
                 IncLotTask task = new IncLotTask();
