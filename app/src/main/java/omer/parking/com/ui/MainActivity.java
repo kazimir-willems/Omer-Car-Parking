@@ -43,13 +43,16 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import omer.parking.com.adapter.OfficeAdapter;
 import omer.parking.com.event.GetOfficeListEvent;
+import omer.parking.com.event.SetOfficeEvent;
 import omer.parking.com.model.OfficeItem;
 import omer.parking.com.service.GeofenceTransitionsIntentService;
 import omer.parking.com.R;
 import omer.parking.com.task.GetOfficeListTask;
 import omer.parking.com.task.GetRemainingLotTask;
+import omer.parking.com.task.SetOfficeTask;
 import omer.parking.com.util.SharedPrefManager;
 import omer.parking.com.vo.GetOfficeResponseVo;
+import omer.parking.com.vo.SetOfficeResponseVo;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, OnCompleteListener<Void>{
 
@@ -126,6 +129,21 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         GetOfficeResponseVo responseVo = event.getResponse();
         if (responseVo != null) {
             parseOfficeInfo(responseVo.arrays);
+        } else {
+            networkError();
+        }
+    }
+
+    @Subscribe
+    public void onSetOfficeEvent(SetOfficeEvent event) {
+        hideProgressDialog();
+        SetOfficeResponseVo responseVo = event.getResponse();
+        if (responseVo != null) {
+            if(responseVo.success == 1) {
+                setOfficeSuccess();
+            } else {
+                setOfficeFailed();
+            }
         } else {
             networkError();
         }
@@ -262,22 +280,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     public void setOffice(OfficeItem item) {
         selectedItem = item;
-        createGeofence(item);
 
-        SharedPrefManager.getInstance(this).saveCurrentOfficeID(item.getOfficeID());
-        SharedPrefManager.getInstance(this).saveOffice(item.getOfficeName());
-        SharedPrefManager.getInstance(this).saveOfficeAddress(item.getOfficeAddress());
-        SharedPrefManager.getInstance(this).saveLatitude(String.valueOf(item.getLatitude()));
-        SharedPrefManager.getInstance(this).saveLongitude(String.valueOf(item.getLongitude()));
-
-        SharedPrefManager.getInstance(this).saveLeaving(true);
-
-        SharedPrefManager.getInstance(this).saveFirstRun(false);
-
-        Intent intent = new Intent(MainActivity.this, OfficeInfoActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        startSetOffice();
     }
 
     @Override
@@ -289,5 +293,34 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         } else {
             // Get the status code for the error and log it using a user-friendly message.
         }
+    }
+
+    private void startSetOffice() {
+        progressDialog.show();
+        SetOfficeTask task = new SetOfficeTask();
+        task.execute(SharedPrefManager.getInstance(this).getUserID(), selectedItem.getOfficeID());
+    }
+
+    private void setOfficeSuccess() {
+        createGeofence(selectedItem);
+
+        SharedPrefManager.getInstance(this).saveCurrentOfficeID(selectedItem.getOfficeID());
+        SharedPrefManager.getInstance(this).saveOffice(selectedItem.getOfficeName());
+        SharedPrefManager.getInstance(this).saveOfficeAddress(selectedItem.getOfficeAddress());
+        SharedPrefManager.getInstance(this).saveLatitude(String.valueOf(selectedItem.getLatitude()));
+        SharedPrefManager.getInstance(this).saveLongitude(String.valueOf(selectedItem.getLongitude()));
+
+        SharedPrefManager.getInstance(this).saveLeaving(true);
+
+        SharedPrefManager.getInstance(this).saveFirstRun(false);
+
+        Intent intent = new Intent(MainActivity.this, OfficeInfoActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void setOfficeFailed() {
+        Toast.makeText(MainActivity.this, R.string.already_parked, Toast.LENGTH_SHORT).show();
     }
 }

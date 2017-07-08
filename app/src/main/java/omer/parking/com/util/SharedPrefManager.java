@@ -20,6 +20,10 @@ public class SharedPrefManager {
     private static final String TAG_CAME_WITH_CAR = "came_with_car";        //0:No Slot, 1:Parked, 2:No Car, 3:Not parked
     private static final String TAG_IN_OFFICE = "in_office";
     private static final String TAG_LEAVE_FLAG = "leave_flag";  //true: leaved, false: not leaved.
+    private static final String TAG_USER_ID = "user_id";
+    private static final String TAG_MOBILE_PHONE = "phone";
+    private static final String TAG_CAR_PLATE_NUM = "car_plate_num";
+    private static final String TAG_ACTION = "action";
 
     private static SharedPrefManager mInstance;
     private static Context mCtx;
@@ -33,6 +37,20 @@ public class SharedPrefManager {
             mInstance = new SharedPrefManager(context);
         }
         return mInstance;
+    }
+
+    public boolean saveUserID(int value){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(TAG_USER_ID, value);
+        editor.apply();
+        return true;
+    }
+
+    //this method will fetch the device token from shared preferences
+    public int getUserID(){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return  sharedPreferences.getInt(TAG_USER_ID, 0);
     }
 
     public boolean saveCurrentOfficeID(int value){
@@ -218,5 +236,47 @@ public class SharedPrefManager {
     public boolean getLeaving(){
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         return  sharedPreferences.getBoolean(TAG_LEAVE_FLAG, true);
+    }
+
+    public boolean saveCarPlateNum(String num){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(TAG_CAR_PLATE_NUM, num);
+        editor.apply();
+        return true;
+    }
+
+    //this method will fetch the device token from shared preferences
+    public String getCarPlateNum(){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return  sharedPreferences.getString(TAG_CAR_PLATE_NUM, "");
+    }
+
+    public boolean saveMobilePhone(String num){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(TAG_MOBILE_PHONE, num);
+        editor.apply();
+        return true;
+    }
+
+    //this method will fetch the device token from shared preferences
+    public String getMobilePhone(){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return  sharedPreferences.getString(TAG_MOBILE_PHONE, "");
+    }
+
+    public boolean saveAction(boolean value){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(TAG_ACTION, value);
+        editor.apply();
+        return true;
+    }
+
+    //this method will fetch the device token from shared preferences
+    public boolean getAction(){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return  sharedPreferences.getBoolean(TAG_ACTION, false);
     }
 }

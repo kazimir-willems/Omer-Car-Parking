@@ -6,4 +6,7 @@ package omer.parking.com.vo;
 
 public class LoginResponseVo {
     public int success;
+    public int user_id;
+    public String phone;
+    public String car;
 }

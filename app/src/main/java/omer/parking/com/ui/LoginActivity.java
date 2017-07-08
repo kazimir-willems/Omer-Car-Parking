@@ -71,6 +71,13 @@ public class LoginActivity extends AppCompatActivity {
         LoginResponseVo responseVo = event.getResponse();
         if (responseVo != null) {
             if(responseVo.success == 1) {
+
+                //Save User Information
+
+                SharedPrefManager.getInstance(this).saveUserID(responseVo.user_id);
+                SharedPrefManager.getInstance(this).saveMobilePhone(responseVo.phone);
+                SharedPrefManager.getInstance(this).saveCarPlateNum(responseVo.car);
+
                 if(SharedPrefManager.getInstance(LoginActivity.this).getFirstRun()) {
                     Intent intent = new Intent(LoginActivity.this, SettingsActivity.class);
 

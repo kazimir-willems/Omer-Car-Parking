@@ -11,8 +11,11 @@
     <string name="select_office">Select Office</string>
     <string name="action_search">Search</string>
     <string name="network_error">Network Error</string>
-    <string name="your_office">YOUR OFFICE</string>
+    <string name="your_info">YOUR INFORMATION</string>
     <string name="settings">Settings</string>
+    <string name="hint_mobile_num">Mobile Num</string>
+    <string name="hint_car_plate">Car Plate Num</string>
+    <string name="already_parked">You already parked.</string>
 
     <string name="hint_username">Name</string>
     <string name="hint_password">Password</string>

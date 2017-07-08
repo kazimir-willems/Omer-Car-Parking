@@ -26,6 +26,7 @@ import omer.parking.com.event.IncLotEvent;
 import omer.parking.com.task.DecLotTask;
 import omer.parking.com.task.GetRemainingLotTask;
 import omer.parking.com.task.IncLotTask;
+import omer.parking.com.task.SetStatusTask;
 import omer.parking.com.util.SharedPrefManager;
 import omer.parking.com.vo.DecLotResponseVo;
 import omer.parking.com.vo.GetLotResponseVo;
@@ -128,15 +129,20 @@ public class LotInfoActivity extends AppCompatActivity {
             builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    SharedPrefManager.getInstance(LotInfoActivity.this).saveCameWithCar(1);
+                    SetStatusTask task = new SetStatusTask();
+                    task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 1);
                     startDecLotTask();
+
+                    SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
                 }
             });
             builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
-                    SharedPrefManager.getInstance(LotInfoActivity.this).saveCameWithCar(2);
+                    SetStatusTask task = new SetStatusTask();
+                    task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 2);
+                    SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
                 }
             });
             AlertDialog alertDialog = builder.create();
@@ -149,7 +155,7 @@ public class LotInfoActivity extends AppCompatActivity {
         progressDialog.show();
 
         DecLotTask task = new DecLotTask();
-        task.execute(SharedPrefManager.getInstance(this).getCurrentOfficeID());
+        task.execute(SharedPrefManager.getInstance(this).getUserID());
     }
 
     private void startIncLotTask() {
@@ -159,17 +165,20 @@ public class LotInfoActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                SharedPrefManager.getInstance(LotInfoActivity.this).saveCameWithCar(3);
+                SetStatusTask statusTask = new SetStatusTask();
+                statusTask.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 3);
 
                 progressDialog.show();
                 IncLotTask task = new IncLotTask();
-                task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getCurrentOfficeID());
+                task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID());
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
             }
         });
         builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
             }
         });
         AlertDialog alertDialog = builder.create();

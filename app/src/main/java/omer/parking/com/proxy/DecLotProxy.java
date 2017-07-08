@@ -13,7 +13,7 @@ import omer.parking.com.vo.IncLotResponseVo;
 public class DecLotProxy extends BaseProxy {
 
     public DecLotResponseVo run(int id) throws IOException {
-        String param = "?id=" + id;
+        String param = "?user_id=" + id;
 
         String contentString = getPlain(URLManager.getDecLotURL() + param);
 

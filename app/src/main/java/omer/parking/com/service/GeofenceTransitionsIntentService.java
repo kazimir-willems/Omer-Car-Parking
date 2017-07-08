@@ -11,6 +11,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -22,10 +23,14 @@ import org.greenrobot.eventbus.Subscribe;
 
 import omer.parking.com.R;
 import omer.parking.com.event.GetLotEvent;
+import omer.parking.com.event.GetStatusEvent;
 import omer.parking.com.task.GetRemainingLotTask;
+import omer.parking.com.task.GetStatusTask;
+import omer.parking.com.task.SetStatusTask;
 import omer.parking.com.ui.LotInfoActivity;
 import omer.parking.com.util.SharedPrefManager;
 import omer.parking.com.vo.GetLotResponseVo;
+import omer.parking.com.vo.GetStatusResponseVo;
 
 public class GeofenceTransitionsIntentService extends IntentService {
 
@@ -54,36 +59,97 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
             SharedPrefManager.getInstance(this).saveInOffice(true);
 
-            if(SharedPrefManager.getInstance(this).getCameWithCar() == 3) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        GetRemainingLotTask task = new GetRemainingLotTask();
-                        task.execute(SharedPrefManager.getInstance(getApplicationContext()).getCurrentOfficeID());
-                    }
-                }).start();
-            }
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    GetStatusTask task = new GetStatusTask();
+                    task.execute(SharedPrefManager.getInstance(getApplicationContext()).getUserID());
+                }
+            }).start();
         } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
             Log.v("Notification", "Exited");
             SharedPrefManager.getInstance(this).saveInOffice(false);
-            if(SharedPrefManager.getInstance(this).getCameWithCar() == 1) {     // Ask if leaving
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    GetStatusTask task = new GetStatusTask();
+                    task.execute(SharedPrefManager.getInstance(getApplicationContext()).getUserID());
+                }
+            }).start();
+
+            /*if(SharedPrefManager.getInstance(this).getCameWithCar() == 1) {     // Ask if leaving
                 showExitNotification();
             } else if(SharedPrefManager.getInstance(this).getCameWithCar() == 3 || SharedPrefManager.getInstance(this).getCameWithCar() == 2) {  //No Slot or Not came with car
                 SharedPrefManager.getInstance(this).saveCameWithCar(3);
-            }
+            }*/
         }
     }
 
     @Subscribe
     public void onGetLotEvent(GetLotEvent event) {
-        GetLotResponseVo responseVo = event.getResponse();
+        final GetLotResponseVo responseVo = event.getResponse();
         if (responseVo != null) {
-            if(SharedPrefManager.getInstance(this).getCameWithCar() == 3) {
-                if (responseVo.remain_lot == 0) {
-                    showNoSlotNotification();
-                    return;
-                } else if (responseVo.remain_lot > 0) {
-                    showEnterNotification(responseVo.remain_lot);
+            if (responseVo.remain_lot == 0) {
+                showNoSlotNotification();
+                return;
+            } else if (responseVo.remain_lot > 0) {
+                SharedPrefManager.getInstance(getApplicationContext()).saveAction(false);
+
+                final Handler handler = new Handler();
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!SharedPrefManager.getInstance(getApplicationContext()).getAction()) {
+                            showEnterNotification(responseVo.remain_lot);
+                            handler.postDelayed(this, 20000);
+                        }
+                    }
+                };
+
+                handler.post(runnable);
+
+            }
+        }
+
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe
+    public void onGetStatusEvent(GetStatusEvent event) {
+        GetStatusResponseVo responseVo = event.getResponse();
+        if(responseVo != null) {
+
+            if(SharedPrefManager.getInstance(getApplicationContext()).getInOffice()) {
+                if (responseVo.status == 3) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            GetRemainingLotTask task = new GetRemainingLotTask();
+                            task.execute(SharedPrefManager.getInstance(getApplicationContext()).getCurrentOfficeID());
+                        }
+                    }).start();
+
+                }
+            } else {
+                if(responseVo.status == 1) {
+                    SharedPrefManager.getInstance(getApplicationContext()).saveAction(false);
+
+                    final Handler handler = new Handler();
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            if(!SharedPrefManager.getInstance(getApplicationContext()).getAction()) {
+                                showExitNotification();
+                                handler.postDelayed(this, 20000);
+                            }
+                        }
+                    };
+
+                    handler.post(runnable);
+                } else if (responseVo.status == 3 || responseVo.status == 2) {
+                    SetStatusTask task = new SetStatusTask();
+                    task.execute(SharedPrefManager.getInstance(getApplicationContext()).getUserID(), 3);
                 }
             }
         }

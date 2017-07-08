@@ -19,7 +19,7 @@ import omer.parking.com.vo.GetOfficeResponseVo;
 public class GetLotProxy extends BaseProxy {
 
     public GetLotResponseVo run(int id) throws IOException {
-        String param = "?id=" + id;
+        String param = "?office_id=" + id;
 
         String contentString = getPlain(URLManager.getRemainingLotURL() + param);
 

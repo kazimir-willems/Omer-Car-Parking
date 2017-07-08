@@ -43,6 +43,10 @@ public class OfficeInfoActivity extends AppCompatActivity {
     TextView tvLongitude;
     @Bind(R.id.tv_remaining_lot)
     TextView tvRemainingLot;
+    @Bind(R.id.tv_mobile)
+    TextView tvMobileNum;
+    @Bind(R.id.tv_car_plate)
+    TextView tvCarPlateNum;
 
     private ProgressDialog progressDialog;
 
@@ -53,6 +57,8 @@ public class OfficeInfoActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        tvMobileNum.setText(SharedPrefManager.getInstance(this).getMobilePhone());
+        tvCarPlateNum.setText(SharedPrefManager.getInstance(this).getCarPlateNum());
         tvOffice.setText(SharedPrefManager.getInstance(this).getOffice());
         tvOfficeAddress.setText(SharedPrefManager.getInstance(this).getOfficeAddress());
         tvLatitude.setText(SharedPrefManager.getInstance(this).getLatitude());
