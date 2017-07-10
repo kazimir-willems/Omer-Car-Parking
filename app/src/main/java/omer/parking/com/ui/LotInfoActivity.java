@@ -178,6 +178,8 @@ public class LotInfoActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
+                SetStatusTask statusTask = new SetStatusTask();
+                statusTask.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 2);
                 SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
             }
         });

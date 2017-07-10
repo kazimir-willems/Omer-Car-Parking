@@ -91,6 +91,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
         final GetLotResponseVo responseVo = event.getResponse();
         if (responseVo != null) {
             if (responseVo.remain_lot == 0) {
+                SetStatusTask task = new SetStatusTask();
+                task.execute(SharedPrefManager.getInstance(getApplicationContext()).getUserID(), 0);
                 showNoSlotNotification();
                 return;
             } else if (responseVo.remain_lot > 0) {
@@ -102,7 +104,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                     public void run() {
                         if(!SharedPrefManager.getInstance(getApplicationContext()).getAction()) {
                             showEnterNotification(responseVo.remain_lot);
-                            handler.postDelayed(this, 20000);
+                            handler.postDelayed(this, 120000);
                         }
                     }
                 };
@@ -141,13 +143,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
                         public void run() {
                             if(!SharedPrefManager.getInstance(getApplicationContext()).getAction()) {
                                 showExitNotification();
-                                handler.postDelayed(this, 20000);
+                                handler.postDelayed(this, 120000);
                             }
                         }
                     };
 
                     handler.post(runnable);
-                } else if (responseVo.status == 3 || responseVo.status == 2) {
+                } else if (responseVo.status == 3 || responseVo.status == 2 || responseVo.status == 0) {
                     SetStatusTask task = new SetStatusTask();
                     task.execute(SharedPrefManager.getInstance(getApplicationContext()).getUserID(), 3);
                 }
