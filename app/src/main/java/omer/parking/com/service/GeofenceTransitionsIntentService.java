@@ -59,42 +59,37 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         // Get the transition type.
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
-        ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        /*ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        boolean internetConnectFlag = conMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED || conMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED;
+        boolean internetConnectFlag = conMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED || conMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED;*/
 
+//        boolean internetConnectFlag = true;
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             Log.v("Notification", "Entered");
 
-            if(internetConnectFlag) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        GetNotificationTask task = new GetNotificationTask();
-                        task.execute(SharedPrefManager.getInstance(getApplicationContext()).getUserID(), 1);
+            SharedPrefManager.getInstance(getApplicationContext()).saveInOffice(true);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    GetNotificationTask task = new GetNotificationTask();
+                    task.execute(SharedPrefManager.getInstance(getApplicationContext()).getUserID(), 1);
 
-                        SharedPrefManager.getInstance(getApplicationContext()).saveAction(false);
-                    }
-                }).start();
-            } else {
-                SharedPrefManager.getInstance(getApplicationContext()).saveNoConnectionAction(1);
-            }
+                    SharedPrefManager.getInstance(getApplicationContext()).saveAction(false);
+                }
+            }).start();
         } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
             Log.v("Notification", "Exited");
 
-            if(internetConnectFlag) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        GetNotificationTask task = new GetNotificationTask();
-                        task.execute(SharedPrefManager.getInstance(getApplicationContext()).getUserID(), 0);
+            SharedPrefManager.getInstance(getApplicationContext()).saveInOffice(false);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    GetNotificationTask task = new GetNotificationTask();
+                    task.execute(SharedPrefManager.getInstance(getApplicationContext()).getUserID(), 0);
 
-                        SharedPrefManager.getInstance(getApplicationContext()).saveAction(false);
-                    }
-                }).start();
-            } else {
-                SharedPrefManager.getInstance(getApplicationContext()).saveNoConnectionAction(2);
-            }
+                    SharedPrefManager.getInstance(getApplicationContext()).saveAction(false);
+                }
+            }).start();
         }
     }
 
@@ -134,6 +129,12 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
                     exitHandler.post(exitRunnable);
                     break;
+            }
+        } else {
+            if(SharedPrefManager.getInstance(getApplicationContext()).getInOffice()) {
+                SharedPrefManager.getInstance(getApplicationContext()).saveNoConnectionAction(1);
+            } else {
+                SharedPrefManager.getInstance(getApplicationContext()).saveNoConnectionAction(2);
             }
         }
     }
