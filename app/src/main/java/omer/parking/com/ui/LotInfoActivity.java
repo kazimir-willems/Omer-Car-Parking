@@ -23,6 +23,7 @@ import omer.parking.com.event.DecLotEvent;
 import omer.parking.com.event.GetLotEvent;
 import omer.parking.com.event.GetOfficeListEvent;
 import omer.parking.com.event.IncLotEvent;
+import omer.parking.com.event.SetStatusEvent;
 import omer.parking.com.task.DecLotTask;
 import omer.parking.com.task.GetRemainingLotTask;
 import omer.parking.com.task.IncLotTask;
@@ -32,6 +33,7 @@ import omer.parking.com.vo.DecLotResponseVo;
 import omer.parking.com.vo.GetLotResponseVo;
 import omer.parking.com.vo.GetOfficeResponseVo;
 import omer.parking.com.vo.IncLotResponseVo;
+import omer.parking.com.vo.SetStatusResponseVo;
 
 public class LotInfoActivity extends AppCompatActivity {
 
@@ -63,10 +65,10 @@ public class LotInfoActivity extends AppCompatActivity {
 
         if(enterFlag == 1) {
             tvTitle.setText(getResources().getString(R.string.exiting_office));
+            confirmExit();
         } else {
             tvTitle.setText(getResources().getString(R.string.entering_office));
-            int remainSlot = getIntent().getIntExtra("remaining_slot", 0);
-            processLot(remainSlot);
+            confirmEnter();
         }
 
         tvOffice.setText(SharedPrefManager.getInstance(this).getOffice());
@@ -84,9 +86,6 @@ public class LotInfoActivity extends AppCompatActivity {
         super.onResume();
 
         EventBus.getDefault().register(this);
-
-        if(enterFlag == 1)
-            startIncLotTask();
     }
 
     @Override
@@ -108,47 +107,78 @@ public class LotInfoActivity extends AppCompatActivity {
     }
 
     @Subscribe
-    public void onIncLotEvent(IncLotEvent event) {
+    public void onSetStatusEvent(SetStatusEvent event) {
         hideProgressDialog();
-        IncLotResponseVo responseVo = event.getResponse();
+        SetStatusResponseVo responseVo = event.getResponse();
         if (responseVo != null) {
-            tvRemainingLot.setText(String.valueOf(responseVo.remain_lot));
+            tvRemainingLot.setText(String.valueOf(responseVo.remain));
         } else {
             networkError();
         }
     }
 
-    private void processLot(int remainSlot) {
-        tvRemainingLot.setText(String.valueOf(remainSlot));
+    private void confirmEnter() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.app_name);
+        builder.setMessage(R.string.ask_came_with_car);
+        builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                /*SetStatusTask task = new SetStatusTask();
+                task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 1);
+                startDecLotTask();*/
+                SetStatusTask task = new SetStatusTask();
+                task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 1);
 
-        if(SharedPrefManager.getInstance(this).getLeaving()) {
-            SharedPrefManager.getInstance(this).saveLeaving(false);
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.app_name);
-            builder.setMessage(R.string.ask_came_with_car);
-            builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    SetStatusTask task = new SetStatusTask();
-                    task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 1);
-                    startDecLotTask();
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveNoConnectionAction(0);
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
+            }
+        });
+        builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                /*SetStatusTask task = new SetStatusTask();
+                task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 2);*/
+                SetStatusTask task = new SetStatusTask();
+                task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 0);
 
-                    SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
-                }
-            });
-            builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    SetStatusTask task = new SetStatusTask();
-                    task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 2);
-                    SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
-                }
-            });
-            AlertDialog alertDialog = builder.create();
-            alertDialog.setCancelable(false);
-            alertDialog.show();
-        }
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveNoConnectionAction(0);
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.setCancelable(false);
+        alertDialog.show();
+    }
+
+    private void confirmExit() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.app_name);
+        builder.setMessage(R.string.ask_leaving_office);
+        builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                SetStatusTask task = new SetStatusTask();
+                task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 1);
+
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveNoConnectionAction(0);
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
+            }
+        });
+        builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                SetStatusTask task = new SetStatusTask();
+                task.execute(SharedPrefManager.getInstance(LotInfoActivity.this).getUserID(), 0);
+
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveNoConnectionAction(0);
+                SharedPrefManager.getInstance(LotInfoActivity.this).saveAction(true);
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.setCancelable(false);
+        alertDialog.show();
     }
 
     private void startDecLotTask() {

@@ -6,4 +6,5 @@ package omer.parking.com.vo;
 
 public class SetStatusResponseVo {
     public int success;
+    public int remain;
 }

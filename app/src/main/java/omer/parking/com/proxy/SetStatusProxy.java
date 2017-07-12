@@ -11,7 +11,7 @@ import omer.parking.com.vo.SetStatusResponseVo;
 public class SetStatusProxy extends BaseProxy {
 
     public SetStatusResponseVo run(int userId, int status) throws IOException {
-        String param = "?user_id=" + userId + "&status=" + status;
+        String param = "?user_id=" + userId + "&response_status=" + status;
 
         String contentString = getPlain(URLManager.getSetStatusURL() + param);
 

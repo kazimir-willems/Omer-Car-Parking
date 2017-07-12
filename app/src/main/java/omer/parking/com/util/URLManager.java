@@ -30,10 +30,14 @@ public class URLManager {
     }
 
     public static String getSetStatusURL() {
-        return "http://uaeparking.com/setStatus";
+        return "http://uaeparking.com/updateStatus";
     }
 
     public static String getGetStatusURL() {
         return "http://uaeparking.com/getStatus";
+    }
+
+    public static String getNotificationURL() {
+        return "http://uaeparking.com/getNotification";
     }
 }

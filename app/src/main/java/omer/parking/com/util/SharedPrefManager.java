@@ -24,6 +24,7 @@ public class SharedPrefManager {
     private static final String TAG_MOBILE_PHONE = "phone";
     private static final String TAG_CAR_PLATE_NUM = "car_plate_num";
     private static final String TAG_ACTION = "action";
+    private static final String TAG_NO_CONNECTION_ACTION = "no_connection_action";      //0: act, 1: entering, 2:exiting
 
     private static SharedPrefManager mInstance;
     private static Context mCtx;
@@ -278,5 +279,19 @@ public class SharedPrefManager {
     public boolean getAction(){
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         return  sharedPreferences.getBoolean(TAG_ACTION, false);
+    }
+
+    public boolean saveNoConnectionAction(int value){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(TAG_NO_CONNECTION_ACTION, value);
+        editor.apply();
+        return true;
+    }
+
+    //this method will fetch the device token from shared preferences
+    public int getNoConnectionAction(){
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return  sharedPreferences.getInt(TAG_NO_CONNECTION_ACTION, 0);
     }
 }
