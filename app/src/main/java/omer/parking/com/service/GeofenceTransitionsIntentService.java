@@ -67,6 +67,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             Log.v("Notification", "Entered");
 
+            showNotification("Enter");
+
             SharedPrefManager.getInstance(getApplicationContext()).saveInOffice(true);
             new Thread(new Runnable() {
                 @Override
@@ -79,6 +81,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
             }).start();
         } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
             Log.v("Notification", "Exited");
+
+            showNotification("Exit");
 
             SharedPrefManager.getInstance(getApplicationContext()).saveInOffice(false);
             new Thread(new Runnable() {
@@ -137,6 +141,33 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 SharedPrefManager.getInstance(getApplicationContext()).saveNoConnectionAction(2);
             }
         }
+    }
+
+    public void showNotification(String text) {
+
+        // 1. Create a NotificationManager
+        NotificationManager notificationManager =
+                (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // 2. Create a PendingIntent for AllGeofencesActivity
+        Intent intent = new Intent(this, LotInfoActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra("enter_flag", 1);
+        PendingIntent pendingNotificationIntent = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Uri sound = Uri.parse(SharedPrefManager.getInstance(this).getDefaultTune());
+        // 3. Create and send a notification
+        Notification notification = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(getResources().getString(R.string.app_name))
+                .setContentText(text)
+                .setSound(sound)
+                .setContentIntent(pendingNotificationIntent)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .build();
+        notificationManager.notify(3, notification);
     }
 
     public void showExitNotification() {
