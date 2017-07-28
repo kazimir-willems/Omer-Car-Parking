@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private ProgressDialog progressDialog;
 
-    private static final int RADIUS = 200;
+    private static final int RADIUS = 400;
 
     OfficeItem selectedItem;
 
